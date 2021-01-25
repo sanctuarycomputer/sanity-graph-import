@@ -46,8 +46,13 @@
 		"@semantic-release/npm": "^7.0.10",
 		"@semantic-release/release-notes-generator": "^9.0.1",
 		"@size-limit/preset-small-lib": "^4.9.1",
+		"@types/cli-progress": "^3.8.0",
+		"@types/lodash": "^4.14.168",
+		"@types/prettier": "^2.1.6",
+		"@types/semantic-release": "^17.2.0",
 		"codecov": "^3.8.1",
 		"husky": "^4.3.8",
+		"lodash": "^4.17.20",
 		"markdown-toc": "^1.2.0",
 		"prettier": "^2.2.1",
 		"pretty-quick": "^3.1.0",
@@ -64,5 +69,13 @@
 			"pre-commit": "tsdx lint",
 			"commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
 		}
+	},
+	"dependencies": {
+		"@sanity/import": "^2.1.4",
+		"chalk": "^4.1.0",
+		"cli-progress": "^3.8.2",
+		"p-queue": "^6.6.2",
+		"prompt-confirm": "^2.0.4",
+		"tiny-invariant": "^1.1.0"
 	}
 }
