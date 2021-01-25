@@ -128,9 +128,9 @@ export const migrate = async ({
 
   const batchSize = destination.batchSize ?? DEFAULT_BATCH_SIZE
 
-  await insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
+  insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
     batchSize,
   })
 
-  console.log(initialDocuments)
+  log('Success! 🎉')
 }

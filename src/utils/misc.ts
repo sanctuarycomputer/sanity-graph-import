@@ -1,3 +1,5 @@
+/* weird eslint bug */
+/* eslint-disble-next-line */
 import { Maybe } from '../types'
 
 export const flat = <T>(arrays: T[][]): T[] =>

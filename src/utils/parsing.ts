@@ -141,7 +141,7 @@ export const createRemapAssetReferences = (uploadedAssets: MigratedAsset[]) => (
 
 export const createRemapDocumentReferences = (allDocs: SanityDocument[]) => (
   doc: SanityDocument,
-  _weak: boolean = true
+  _weak = true
 ): SanityDocument => {
   const remap = <T extends SanityDocument | SanityObject>(obj: T): T => {
     const getNewValue = (
@@ -180,7 +180,7 @@ export const createRemapDocumentReferences = (allDocs: SanityDocument[]) => (
 export const createRemapReferences = (
   allDocs: SanityDocument[],
   uploadedAssets: MigratedAsset[]
-) => (document: SanityDocument, _weak: boolean = true): SanityDocument => {
+) => (document: SanityDocument, _weak = true): SanityDocument => {
   const remapDocumentReferences = createRemapDocumentReferences(
     allDocs.concat(uploadedAssets.map(({ destination }) => destination))
   )

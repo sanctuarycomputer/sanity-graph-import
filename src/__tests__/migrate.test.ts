@@ -36,6 +36,7 @@ describe('migrate', () => {
   })
 
   it('should throw if the source client has a token', async () => {
+    /* eslint-disable no-console */
     console.warn = () => undefined
     const config = {
       source: {
