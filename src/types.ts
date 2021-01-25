@@ -1,15 +1,14 @@
 import {
   SanityAssetDocument as SanityAssetDocumentType,
-  SanityDocument as SanityDocumentType
-} from '@sanity/client';
+  SanityDocument as SanityDocumentType,
+} from '@sanity/client'
 
-export type Maybe<T> = T | null | undefined | void;
+export type Maybe<T> = T | null | undefined | void
 
-export type SanityAssetDocument = SanityAssetDocumentType;
+export type SanityAssetDocument = SanityAssetDocumentType
 
 export interface SanityObject {
-  // _type: string;
-  [key: string]: SanityFieldValue;
+  [key: string]: SanityFieldValue
 }
 
 export type SanityFieldValue =
@@ -20,35 +19,35 @@ export type SanityFieldValue =
   | boolean
   | string
   | number
-  | void;
+  | void
 
 export type SanityDocument = Pick<SanityDocumentType, '_id' | '_type'> & {
-  [key: string]: SanityFieldValue;
-};
+  [key: string]: SanityFieldValue
+}
 
 export interface MigratedDocument<
   DocType extends SanityDocument = SanityDocument
 > {
-  source: DocType;
-  destination: DocType;
+  source: DocType
+  destination: DocType
 }
 
 export interface UnMigratedDocument<
   DocType extends SanityDocument = SanityDocument
 > {
-  source: DocType;
-  destination?: DocType;
+  source: DocType
+  destination?: DocType
 }
 
-export type MigratedAsset = MigratedDocument<SanityAssetDocument>;
-export type UnMigratedAsset = UnMigratedDocument<SanityAssetDocument>;
+export type MigratedAsset = MigratedDocument<SanityAssetDocument>
+export type UnMigratedAsset = UnMigratedDocument<SanityAssetDocument>
 
 export interface SanityReference extends SanityObject {
-  _type: 'reference';
-  _ref: string;
+  _type: 'reference'
+  _ref: string
 }
 
 export interface SanityAssetObject extends SanityObject {
-  _type: 'image' | 'file';
-  asset: SanityReference;
+  _type: 'image' | 'file'
+  asset: SanityReference
 }
