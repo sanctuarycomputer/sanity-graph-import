@@ -1,6 +1,6 @@
 {
-	"name": "sanity-graph-import",
-	"author": "Joseph Thomas",
+	"name": "@sanctu/sanity-graph-import",
+	"author": "Sanctuary Computer",
 	"version": "0.1.0",
 	"license": "MIT",
 	"main": "dist/index.js",
