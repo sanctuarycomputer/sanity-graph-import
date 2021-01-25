@@ -19,7 +19,7 @@
 		"test:coverage": "tsdx test --collectCoverage",
 		"test:watch": "tsdx test --watch",
 		"test:coverage:send": "codecov",
-		"lint": "tsdx lint",
+		"lint": "tsdx lint src",
 		"prepare": "tsdx build",
 		"size": "size-limit",
 		"analyze": "size-limit --why"
@@ -51,6 +51,10 @@
 		"@types/prettier": "^2.1.6",
 		"@types/semantic-release": "^17.2.0",
 		"codecov": "^3.8.1",
+		"eslint-config-prettier": "^7.2.0",
+		"eslint-config-react-app": "^6.0.0",
+		"eslint-plugin-prettier": "^3.3.1",
+		"eslint-plugin-react": "^7.22.0",
 		"husky": "^4.3.8",
 		"lodash": "^4.17.20",
 		"markdown-toc": "^1.2.0",
@@ -72,6 +76,8 @@
 	},
 	"dependencies": {
 		"@sanity/import": "^2.1.4",
+		"@typescript-eslint/eslint-plugin": "^4.14.1",
+		"@typescript-eslint/parser": "^4.14.1",
 		"chalk": "^4.1.0",
 		"cli-progress": "^3.8.2",
 		"p-queue": "^6.6.2",
