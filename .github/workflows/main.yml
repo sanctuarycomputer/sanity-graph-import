@@ -19,7 +19,7 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Install deps and build (with cache)
-        uses: bahmutov/npm-install@v1
+        uses: yarn install
 
       - name: Lint
         run: yarn lint
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install deps and build (with cache)
-        uses: bahmutov/npm-install@v1
+        uses: yarn install
       - name: Build
         run: yarn build
       - name: Checkout
