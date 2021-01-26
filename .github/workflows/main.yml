@@ -36,9 +36,6 @@ jobs:
       - name: Install deps and build 
         run: yarn install
 
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Semantic Release
         run: semantic-release
         env:
