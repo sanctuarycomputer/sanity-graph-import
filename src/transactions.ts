@@ -45,8 +45,8 @@ export const fetchDocumentsByType = async (
 export const deleteAll = async (
   client: SanityClient
 ): Promise<MultipleMutationResult> => {
-  const { dataset } = client.config()
-  logDelete(`Clearing ${dataset} dataset...`)
+  const { dataset, projectId } = client.config()
+  logDelete(`Clearing ${projectId}/${dataset} dataset...`)
   const allDocuments = await client.fetch<SanityDocument[]>('*[]')
   const ids = allDocuments
     .map((doc) => doc._id)
@@ -61,7 +61,7 @@ export const deleteAll = async (
     initialTrx
   )
   const result = await finalTrx.commit()
-  logDelete(`Removed ${ids.length} documents from dataset ${dataset}`)
+  logDelete(`Removed ${ids.length} documents from ${projectId}/${dataset}`)
   return result
 }
 

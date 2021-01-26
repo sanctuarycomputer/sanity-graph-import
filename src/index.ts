@@ -101,7 +101,7 @@ export const migrate = async ({
   const allIds = unique(docIds.concat(referencedIds))
 
   logFetch(`Found ${initialDocuments.length} initial documents`)
-  logFetch(`   ${referencedIds.length} referenced documents`)
+  logFetch(`      + ${referencedIds.length} referenced documents`)
 
   const sourceDocuments = await sourceClient.fetch<SanityDocument[]>(
     `*[_id in $allIds && _type != 'sanity.imageAsset' && _type != 'sanity.fileAsset']`,
@@ -116,7 +116,7 @@ export const migrate = async ({
     `*[_id in $assetIds]`,
     { assetIds }
   )
-  logFetch(`Fetched ${sourceAssets.length} source assets`)
+  logFetch(`      + ${sourceAssets.length} source assets`)
 
   const confirmDelete = new PromptConfirm(
     'Do you want to remove all data from the destination dataset?'

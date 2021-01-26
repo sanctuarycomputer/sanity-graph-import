@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-const mainColor = chalk.white
+const mainColor = chalk.black.bgMagenta
 const errorColor = chalk.bold.red
 const writeColor = chalk.green
 const fetchColor = chalk.green
