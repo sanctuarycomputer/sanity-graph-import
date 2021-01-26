@@ -35,7 +35,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Install deps and build 
+      - name: Install dependencies and build 
         run: yarn install
 
       - name: Semantic Release
