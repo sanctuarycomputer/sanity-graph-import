@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install deps and build (with cache)
+      - name: Install deps and build 
         run: yarn install
 
       - name: Lint
@@ -26,19 +26,19 @@ jobs:
 
       - name: Test
         run: yarn test --ci --coverage --maxWorkers=2
-
-      - name: Build
-        run: yarn build
   publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Install deps and build (with cache)
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Install deps and build 
         run: yarn install
-      - name: Build
-        run: yarn build
+
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
         env:
