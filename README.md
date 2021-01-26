@@ -1,4 +1,7 @@
 # Sanity Graph Import
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 `sanity-graph-import` is a tool for making partial migrations from one [Sanity](https://www.sanity.io) dataset or project to another. This can be useful if you only want to import particular documents and those they reference. A common use case might be "refreshing" a staging dataset from production - when the production dataset is large and would otherwise take a lot of time and bandwidth to export & import.
 
@@ -132,3 +135,23 @@ See [CONTRIBUTING.md]('/CONTRIBUTING.md')
 # License
 
 MIT
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://www.good-idea.studio"><img src="https://avatars.githubusercontent.com/u/11514928?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Joseph Thomas</b></sub></a><br /><a href="https://github.com/sanctuarycomputer/sanity-graph-import/commits?author=good-idea" title="Documentation">📖</a> <a href="https://github.com/sanctuarycomputer/sanity-graph-import/commits?author=good-idea" title="Code">💻</a> <a href="https://github.com/sanctuarycomputer/sanity-graph-import/commits?author=good-idea" title="Tests">⚠️</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
