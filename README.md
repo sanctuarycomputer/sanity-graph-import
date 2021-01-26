@@ -13,7 +13,7 @@ Looking to copy an entire dataset? Use [Sanity's CLI instead](https://www.sanity
 
 # Usage
 
-```
+```js
 // my-project/scripts/migrate.js
 import { migrate } from '@sanctucompu/sanity-graph-import'
 import CreateClient from '@sanity/client'
@@ -86,7 +86,7 @@ A promise that resolve's with the final mutation results.
 
 **`config`**: `ImportConfig`
 
-```
+```ts
 interface ImportConfig {
   source: SourceConfig
   destination: DestinationConfig
