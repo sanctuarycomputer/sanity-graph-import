@@ -19,7 +19,6 @@ Looking to copy an entire dataset? Use [Sanity's CLI instead](https://www.sanity
 
 # Usage
 
-
 ```js
 // my-project/scripts/migrate.js
 import { migrate } from '@sanctucompu/sanity-graph-import'
@@ -125,6 +124,10 @@ interface DestinationConfig {
   batchSize?: number
 }
 ```
+
+# Contributing
+
+See [CONTRIBUTING.md]('/CONTRIBUTING.md')
 
 # License
 
