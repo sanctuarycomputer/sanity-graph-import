@@ -1,103 +1,124 @@
-# TSDX User Guide
+# Sanity Graph Import
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+`sanity-graph-import` is a tool for making partial migrations from one [Sanity](https://www.sanity.io) dataset or project to another. This can be useful if you only want to import particular documents and those they reference. A common use case might be "refreshing" a staging dataset from production - when the production dataset is large and would otherwise take a lot of time and bandwidth to export & import.
 
-> This TSDX setup is meant for developing libraries (not apps!) that can be published to NPM. If you’re looking to build a Node app, you could use `ts-node-dev`, plain `ts-node`, or simple `tsc`.
+Example: Your **production** dataset has 1000's of `article` documents, each of which contain references to one or more `author` documents. For your staging dataset, you only want the first 10 articles *and* their authors -- as well as any image & file assets these documents include.
 
-> If you’re new to TypeScript, checkout [this handy cheatsheet](https://devhints.io/typescript)
+Looking to copy an entire dataset? Use [Sanity's CLI instead](https://www.sanity.io/docs/importing-data) instead.
 
-## Commands
+### Coming Soon
 
-TSDX scaffolds your new library inside `/src`.
+- Run from the command line
+- Specify the depth of graph traversal
 
-To run TSDX, use:
+# Usage
 
-```bash
-npm start # or yarn start
+```
+// my-project/scripts/migrate.js
+import { migrate } from '@sanctucompu/sanity-graph-import'
+import CreateClient from '@sanity/client'
+
+const sourceClient = CreateClient({
+  projectId: 'abc123xyz',
+  dataset: 'production',
+})
+
+const destinationClient = CreateClient({
+  projectId: 'abc123xyz',
+  dataset: 'staging',
+  token: '789abc123xyz' // Required!
+})
+
+const initialQueries = [
+  /* Fetch the 10 latest articles */
+  {
+    query: `
+      *[_type == 'article']
+      | order(releaseDate desc)
+      | order(_createdAt desc) [0...$count]
+    `,
+    params: {
+      count: 10
+    }
+  },
+  /* Fetch the homepage document */
+  {
+    query: `*[_type == 'homepage']`
+  }
+]
+
+
+
+async function run() {
+  const config = {
+    source: {
+      client: sourceClient,
+      initialQueries
+    },
+    desitination: {
+      client: destinationClient
+    }
+  }
+
+  await migrate(config)
+}
+
+run()
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+Then, run `node my-project/scripts/migrate.js`
 
-To do a one-off build, use `npm run build` or `yarn build`.
+This configuration will populate your destination dataset with:
 
-To run tests, use `npm test` or `yarn test`.
+- 10 article documents
+- Every author document referenced in those articles
+- The homepage document
+- All assets from all of the above
+- And any other documents referenced in the articles or the homepage
 
-## Configuration
+# API
 
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
+## `migrate(config)`
 
-### Jest
+**Returns**
 
-Jest tests are set up to run with `npm test` or `yarn test`.
+A promise that resolve's with the final mutation results.
 
-### Bundle Analysis
+**`config`**: `ImportConfig`
 
-[`size-limit`](https://github.com/ai/size-limit) is set up to calculate the real cost of your library with `npm run size` and visualize the bundle with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
 ```
+interface ImportConfig {
+  source: SourceConfig
+  destination: DestinationConfig
+}
 
-### Rollup
+type QueryParams = Record<string, any>
 
-TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
+interface QueryArgs {
+  query: string
+  params?: QueryParams
+}
 
-### TypeScript
+interface SourceConfig {
+  initialQueries: QueryArgs[]
+  client: SanityClient
+}
 
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
-
-## Continuous Integration
-
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
+interface DestinationConfig {
+  /* The destination client must have a write token! */
+  client: SanityClient
+  /**
+   * The number of documents to include in a batch.
+   *
+   * default: 35
+   *
+   * If you are getting 'content-length' errors during migration,
+   * set this to a lower number.
+   */
+  batchSize?: number
 }
 ```
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
+# License
 
-## Module Formats
-
-CJS, ESModules, and UMD module formats are supported.
-
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
-
-## Named Exports
-
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
-
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using [np](https://github.com/sindresorhus/np).
+MIT
