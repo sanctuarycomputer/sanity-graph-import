@@ -16,6 +16,7 @@
 		"start": "tsdx watch",
 		"build": "tsdx build",
 		"test": "tsdx test",
+		"test:init": "echo TODO",
 		"test:coverage": "tsdx test --collectCoverage",
 		"test:watch": "tsdx test --watch",
 		"test:coverage:send": "codecov",
@@ -23,6 +24,7 @@
 		"prepare": "tsdx build",
 		"size": "size-limit",
 		"analyze": "size-limit --why",
+		"test-studio:init": "sh ./scripts/test-studio/init.sh",
 		"semantic-release": "semantic-release"
 	},
 	"module": "dist/sanity-graph-import.esm.js",
@@ -39,6 +41,7 @@
 	"devDependencies": {
 		"@commitlint/cli": "^11.0.0",
 		"@commitlint/config-conventional": "^11.0.0",
+		"@sanity/cli": "^2.2.3",
 		"@sanity/client": "^2.1.4",
 		"@semantic-release/changelog": "^5.0.1",
 		"@semantic-release/commit-analyzer": "^8.0.1",
@@ -82,6 +85,7 @@
 		"@typescript-eslint/parser": "^4.14.1",
 		"chalk": "^4.1.0",
 		"cli-progress": "^3.8.2",
+		"dotenv": "^8.2.0",
 		"p-queue": "^6.6.2",
 		"prompt-confirm": "^2.0.4",
 		"tiny-invariant": "^1.1.0"

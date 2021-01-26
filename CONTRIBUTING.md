@@ -2,6 +2,9 @@
 
 Thanks for your interest in making a contribution!
 
+
+## Setup
+
 To get started:
 
 - Fork this repo
@@ -9,6 +12,12 @@ To get started:
 - Install packages: `yarn install`
 - Set up your test studio (required for running tests) `yarn test-studio:init`
 - Set up tests: `yarn test:init` (TODO #7)
+
+You will need to be logged into Sanity - if you haven't done this on your machine, run `npx @sanity/cli login`.
+
+You'll now have a sample test studio under your account that you can use to try things out.
+
+## Development
 
 You can now run `yarn start` to compile on file changes and `yarn test:watch` to get the tests running.
 

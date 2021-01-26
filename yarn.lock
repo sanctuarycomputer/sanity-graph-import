@@ -1391,6 +1391,11 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
+"@sanity/cli@^2.2.3":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@sanity/cli/-/cli-2.2.3.tgz#9f83ba610f779b7a9a8be879f64fcaae01049071"
+  integrity sha512-gRcvhbJcya3TpmZ0/er7qyCOd71JMfvqlFO5HNkbAGpE7RNpgctev3zQAfvdfef6X2LFJ7ZP5CVeQDe+mNU9nA==
+
 "@sanity/client@^2.1.4":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@sanity/client/-/client-2.1.4.tgz#89f64d4ec706b6c9e70605c2249677c22cab984e"
@@ -4681,6 +4686,11 @@ dotenv@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-5.0.1.tgz#a5317459bd3d79ab88cff6e44057a6a3fbb1fcef"
   integrity sha512-4As8uPrjfwb7VXC+WnLCbXK7y+Ueb2B3zgNCePYfhxS1PYeaO1YTeplffTEcbfLhvFNGLAz90VvJs9yomG7bow==
+
+dotenv@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
+  integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
 
 duplexer2@~0.1.0:
   version "0.1.4"
