@@ -33,6 +33,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Install deps and build (with cache)
+        uses: bahmutov/npm-install@v1
+      - name: Build
+        run: yarn build
       - name: Checkout
         uses: actions/checkout@v2
       - name: Semantic Release
