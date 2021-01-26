@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/sanctuarycomputer/sanity-graph-import/compare/v1.0.0...v1.0.1) (2021-01-26)
+
+
+### Bug Fixes
+
+* **lib:** await for success message ([fd5a32a](https://github.com/sanctuarycomputer/sanity-graph-import/commit/fd5a32a96a489b92a1c8564718c20ebebf4977b8))
+
 # 1.0.0 (2021-01-26)
 
 
