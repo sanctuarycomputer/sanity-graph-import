@@ -27,7 +27,7 @@ describe('queue', () => {
   it('should apply custom addAll options', async () => {
     const result = await queue(
       dogs.map((dog) => async () => {
-        await sleep(10)
+        await sleep(50)
         return upCaseAsync(dog)
       }),
       // The promises will time out and return undefined
