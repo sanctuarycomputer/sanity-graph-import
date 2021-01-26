@@ -82,9 +82,9 @@ export const migrate = async ({
    */
 
   log(
-    `Migrating from ${sourceClient.config().projectId}:${
+    `Migrating from ${sourceClient.config().projectId}/${
       sourceClient.config().dataset
-    } to ${destinationClient.config().projectId}:${
+    } to ${destinationClient.config().projectId}/${
       destinationClient.config().dataset
     } `
   )
@@ -128,7 +128,7 @@ export const migrate = async ({
 
   const batchSize = destination.batchSize ?? DEFAULT_BATCH_SIZE
 
-  insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
+  await insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
     batchSize,
   })
 
