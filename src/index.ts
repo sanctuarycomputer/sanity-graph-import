@@ -82,9 +82,9 @@ export const migrate = async ({
    */
 
   log(
-    `Migrating from ${sourceClient.config().projectId}:${
+    `Migrating from ${sourceClient.config().projectId}/${
       sourceClient.config().dataset
-    } to ${destinationClient.config().projectId}:${
+    } to ${destinationClient.config().projectId}/${
       destinationClient.config().dataset
     } `
   )
@@ -101,7 +101,7 @@ export const migrate = async ({
   const allIds = unique(docIds.concat(referencedIds))
 
   logFetch(`Found ${initialDocuments.length} initial documents`)
-  logFetch(`   ${referencedIds.length} referenced documents`)
+  logFetch(`      + ${referencedIds.length} referenced documents`)
 
   const sourceDocuments = await sourceClient.fetch<SanityDocument[]>(
     `*[_id in $allIds && _type != 'sanity.imageAsset' && _type != 'sanity.fileAsset']`,
@@ -116,7 +116,7 @@ export const migrate = async ({
     `*[_id in $assetIds]`,
     { assetIds }
   )
-  logFetch(`Fetched ${sourceAssets.length} source assets`)
+  logFetch(`      + ${sourceAssets.length} source assets`)
 
   const confirmDelete = new PromptConfirm(
     'Do you want to remove all data from the destination dataset?'
@@ -128,7 +128,7 @@ export const migrate = async ({
 
   const batchSize = destination.batchSize ?? DEFAULT_BATCH_SIZE
 
-  insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
+  await insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
     batchSize,
   })
 
