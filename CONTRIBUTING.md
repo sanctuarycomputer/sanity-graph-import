@@ -23,9 +23,9 @@ You can now run `yarn start` to compile on file changes and `yarn test:watch` to
 
 Make changes, then commit them with a commit message that matches [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) guidelines. For example:
 
-`git commit -m "fix(lib): fixes some bug"`
-`git commit -m "chore(repo): update dependencies"`
-`git commit -m "docs(repo): update contributors doc"`
+- `git commit -m "fix(lib): fixes some bug"`
+- `git commit -m "chore(repo): update dependencies"`
+- `git commit -m "docs(repo): update contributors doc"`
 
 The format of the message is `[type]([scope]): your message`
 
@@ -46,7 +46,7 @@ And `type` is one of:
 - `chore`: Housekeeping, such as updating dependencies or removing unused files
 - `ci`: Updates to CI configuration
 
-If your updates change the API of the package in a way where users will need to update their usage, include `BREAKING CHANGE` as the last line in your commit message. If you do this, be sure to add a note to [MIGRATING.md]('/MIGRATING.md')!
+If your updates change the API of the package in a way where users will need to update their usage, include `BREAKING CHANGE` as the last line in your commit message. If you do this, be sure to add a note to [MIGRATING.md](MIGRATING.md)!
 
 
 ## Pull Requests
