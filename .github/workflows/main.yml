@@ -26,3 +26,20 @@ jobs:
 
       - name: Test
         run: yarn test --ci --coverage --maxWorkers=2
+  publish:
+    name: Publish to NPM 
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' 
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Install deps and build 
+        run: yarn install
+
+      - name: Semantic Release
+        run: yarn semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
