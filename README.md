@@ -1,4 +1,6 @@
+<div style="text-align: center">
 # Sanity Graph Import
+</div>
 
 <p align="center">
 <img alt="Latest Release" src="https://img.shields.io/github/v/release/sanctuarycomputer/sanity-graph-import?color=green">

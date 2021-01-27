@@ -1,7 +1,15 @@
 import type { SanityClient } from '@sanity/client'
 import PromptConfirm from 'prompt-confirm'
 import invariant from 'tiny-invariant'
-import { log, flat, unique, findReferencedIds, logFetch, queue } from './utils'
+import {
+  log,
+  logError,
+  flat,
+  unique,
+  findReferencedIds,
+  logFetch,
+  queue,
+} from './utils'
 import { deleteAll, insertDocuments } from './transactions'
 import { SanityDocument, SanityAssetDocument } from './types'
 import { DEFAULT_BATCH_SIZE } from './config'
@@ -88,49 +96,53 @@ export const migrate = async ({
       destinationClient.config().dataset
     } `
   )
-  const initialDocuments = flat(
-    await queue<SanityDocument[]>(
-      source.initialQueries.map(({ query, params }) => () =>
-        sourceClient.fetch(query, params || {})
+  try {
+    const initialDocuments = flat(
+      await queue<SanityDocument[]>(
+        source.initialQueries.map(({ query, params }) => () =>
+          sourceClient.fetch(query, params || {})
+        )
       )
     )
-  )
 
-  const docIds = initialDocuments.map(({ _id }) => _id)
-  const referencedIds = flat(initialDocuments.map(findReferencedIds))
-  const allIds = unique(docIds.concat(referencedIds))
+    const docIds = initialDocuments.map(({ _id }) => _id)
+    const referencedIds = flat(initialDocuments.map(findReferencedIds))
+    const allIds = unique(docIds.concat(referencedIds))
 
-  logFetch(`Found ${initialDocuments.length} initial documents`)
-  logFetch(`      + ${referencedIds.length} referenced documents`)
+    logFetch(`Found ${initialDocuments.length} initial documents`)
+    logFetch(`      + ${referencedIds.length} referenced documents`)
 
-  const sourceDocuments = await sourceClient.fetch<SanityDocument[]>(
-    `*[_id in $allIds && _type != 'sanity.imageAsset' && _type != 'sanity.fileAsset']`,
-    { allIds }
-  )
-  logFetch(`Fetched all referenced documents`)
+    const sourceDocuments = await sourceClient.fetch<SanityDocument[]>(
+      `*[_id in $allIds && _type != 'sanity.imageAsset' && _type != 'sanity.fileAsset']`,
+      { allIds }
+    )
+    logFetch(`Fetched all referenced documents`)
 
-  const assetIds = flat(sourceDocuments.map(findReferencedIds)).filter(
-    (id) => id.startsWith('image-') || id.startsWith('file-')
-  )
-  const sourceAssets = await sourceClient.fetch<SanityAssetDocument[]>(
-    `*[_id in $assetIds]`,
-    { assetIds }
-  )
-  logFetch(`      + ${sourceAssets.length} source assets`)
+    const assetIds = flat(sourceDocuments.map(findReferencedIds)).filter(
+      (id) => id.startsWith('image-') || id.startsWith('file-')
+    )
+    const sourceAssets = await sourceClient.fetch<SanityAssetDocument[]>(
+      `*[_id in $assetIds]`,
+      { assetIds }
+    )
+    logFetch(`      + ${sourceAssets.length} source assets`)
 
-  const confirmDelete = new PromptConfirm(
-    'Do you want to remove all data from the destination dataset?'
-  )
-  const confirmed = await confirmDelete.run()
-  if (confirmed) {
-    await deleteAll(destinationClient)
+    const confirmDelete = new PromptConfirm(
+      'Do you want to remove all data from the destination dataset?'
+    )
+    const confirmed = await confirmDelete.run()
+    if (confirmed) {
+      await deleteAll(destinationClient)
+    }
+
+    const batchSize = destination.batchSize ?? DEFAULT_BATCH_SIZE
+
+    await insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
+      batchSize,
+    })
+
+    log('Success! 🎉')
+  } catch (e) {
+    logError(e)
   }
-
-  const batchSize = destination.batchSize ?? DEFAULT_BATCH_SIZE
-
-  await insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
-    batchSize,
-  })
-
-  log('Success! 🎉')
 }

@@ -5,7 +5,6 @@ import {
   MultipleMutationResult,
 } from '@sanity/client'
 import cliProgress from 'cli-progress'
-import PQueue from 'p-queue'
 import getHashedBufferForUri from '@sanity/import/src/util/getHashedBufferForUri'
 import { MigratedAsset, UnMigratedAsset, SanityDocument } from './types'
 import {
@@ -14,11 +13,12 @@ import {
   logWrite,
   logDelete,
   partition,
+  getImageHash,
   isMigratedDocument,
   getUploadedFilename,
   chunk,
   createRemapReferences,
-  logError,
+  queue,
 } from './utils'
 
 export const fetchDocumentsByType = async (
@@ -86,7 +86,7 @@ export const uploadAsset = async (
   const { buffer } = await getHashedBufferForUri(url)
 
   const options = {
-    label: originalAsset._id,
+    label: getImageHash(originalAsset),
     filename: getUploadedFilename(originalAsset),
     source: {
       id: originalAsset._id,
@@ -110,19 +110,19 @@ export const uploadAssets = async (
   client: SanityClient,
   sourceAssets: SanityAssetDocument[]
 ): Promise<MigratedAsset[]> => {
-  const fileNames = definitely(sourceAssets.map(getUploadedFilename))
+  const originalHashes = definitely(sourceAssets.map(getImageHash))
 
   /* Find assets that already exist */
   const existingAssets = await client.fetch<SanityAssetDocument[]>(
-    `*[originalFilename in $fileNames]`,
-    { fileNames }
+    `*[label in $originalHashes]`,
+    { originalHashes }
   )
 
   const assetPairs = sourceAssets.map<MigratedAsset | UnMigratedAsset>(
     (source) => ({
       source,
       destination: existingAssets.find(
-        (ca) => ca.originalFilename === getUploadedFilename(source)
+        (existingAsset) => existingAsset.label === getImageHash(source)
       ),
     })
   )
@@ -138,10 +138,6 @@ export const uploadAssets = async (
   }
 
   logWrite(`Found ${unmigrated.length} new assets to upload`)
-  const assetQueue = new PQueue({
-    concurrency: 1,
-    interval: 1000 / 25,
-  })
 
   const uploadProgressBar = new cliProgress.SingleBar(
     {},
@@ -149,7 +145,7 @@ export const uploadAssets = async (
   )
 
   uploadProgressBar.start(unmigrated.length, 0)
-  const newAssets = await assetQueue.addAll(
+  const newAssets = await queue(
     unmigrated.map(({ source }) => async () => {
       const uploadResult = await uploadAsset(client, source)
       uploadProgressBar.increment()
@@ -182,26 +178,19 @@ export const insertDocuments = async (
     batch: SanityDocument[],
     batchNumber: number
   ): Promise<MultipleMutationResult> => {
-    try {
-      logWrite(`Batch ${batchNumber}: ${batch.length} documents`)
-      const transaction = batch.reduce<Transaction>(
-        (prevTrx, document) => prevTrx.createOrReplace(document),
-        client.transaction()
-      )
+    logWrite(`Batch ${batchNumber}: ${batch.length} documents`)
+    const transaction = batch.reduce<Transaction>(
+      (prevTrx, document) => prevTrx.createOrReplace(document),
+      client.transaction()
+    )
 
-      const result = await transaction.commit()
-      logWrite(`  Batch complete`)
-      return result
-    } catch (e) {
-      logError(e)
-      debugger
-      throw e
-    }
+    const result = await transaction.commit()
+    logWrite(`  Batch complete`)
+    return result
   }
 
   const documentBatches = chunk(updatedDocuments, batchSize)
-  const insertQueue = new PQueue({ concurrency: 1, interval: 1000 / 25 })
-  const allResults = await insertQueue.addAll(
+  const allResults = await queue(
     documentBatches.map((batch, index) => () => insertBatch(batch, index + 1))
   )
   logWrite(
@@ -209,9 +198,8 @@ export const insertDocuments = async (
   )
   logWrite('Strengthening references..')
   const updatedStrong = sourceDocuments.map((doc) => remapRefs(doc, false))
-  const strongQueue = new PQueue({ concurrency: 1, interval: 1000 / 25 })
   const strongBatches = chunk(updatedStrong, batchSize)
-  const strongResults = await strongQueue.addAll(
+  const strongResults = await queue(
     strongBatches.map((batch, index) => () => insertBatch(batch, index + 1))
   )
   return strongResults

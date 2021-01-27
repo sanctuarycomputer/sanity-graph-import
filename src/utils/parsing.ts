@@ -1,4 +1,5 @@
 import { SanityAssetDocument } from '@sanity/client'
+import hash from 'hash-sum'
 import { isPlainObject } from 'lodash'
 import {
   MigratedAsset,
@@ -39,6 +40,9 @@ export const findReferencedIds = (
 export const getUploadedFilename = (asset: SanityAssetDocument): string => {
   return asset.path.replace(/(.*\/)*/, '')
 }
+
+export const getImageHash = (asset: SanityAssetDocument): string =>
+  hash(asset.metadata.lqip)
 
 /**
  * Typeguards
@@ -92,7 +96,7 @@ export const createRemapAssetReferences = (uploadedAssets: MigratedAsset[]) => (
       )
     }
     const newAsset = newAssets.find(
-      (newAsset) => originalAsset._id === newAsset.label
+      (newAsset) => getImageHash(originalAsset) === newAsset.label
     )
     if (!newAsset) {
       throw new Error(
