@@ -2,7 +2,7 @@ import type { SanityClient } from '@sanity/client'
 import PromptConfirm from 'prompt-confirm'
 import invariant from 'tiny-invariant'
 import {
-  log,
+  logHeading,
   logError,
   flat,
   unique,
@@ -89,7 +89,7 @@ export const migrate = async ({
    * Fetch initial documents
    */
 
-  log(
+  logHeading(
     `Migrating from ${sourceClient.config().projectId}/${
       sourceClient.config().dataset
     } to ${destinationClient.config().projectId}/${
@@ -141,7 +141,7 @@ export const migrate = async ({
       batchSize,
     })
 
-    log('Success! 🎉')
+    logHeading('Success! 🎉')
   } catch (e) {
     logError(e)
   }
