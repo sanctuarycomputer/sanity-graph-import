@@ -5,6 +5,7 @@ import {
   createRemapAssetReferences,
   findReferencedIds,
   getUploadedFilename,
+  getAssetType,
   isAsset,
   isSanityAssetObject,
   isSanityObject,
@@ -12,6 +13,7 @@ import {
   isMigratedDocument,
 } from '../parsing'
 import {
+  sourceImage1,
   migratedImage1,
   migratedImage2,
   migratedAssets,
@@ -168,5 +170,24 @@ describe('typeguards', () => {
         source: migratedAssets[0].source,
       })
     ).toBe(false)
+  })
+})
+
+describe('getAssetType', () => {
+  it('should return "image" for images', () => {
+    expect(getAssetType(sourceImage1)).toBe('image')
+  })
+
+  it('should return "file" for files', () => {
+    const dummyFile = {
+      ...sourceImage1,
+      _type: 'sanity.fileAsset',
+    }
+    expect(getAssetType(dummyFile)).toBe('file')
+  })
+
+  it('should throw if given a non-asset', () => {
+    const fn = () => getAssetType(mockSections[0])
+    expect(fn).toThrow('"section" is not a valid sanity asset type')
   })
 })

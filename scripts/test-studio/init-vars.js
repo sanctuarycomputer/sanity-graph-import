@@ -36,7 +36,8 @@ const envContents = `
 TEST_STUDIO_SOURCE_PROJECTID=${projectId}
 TEST_STUDIO_SOURCE_DATASET=${sourceDataset}
 TEST_STUDIO_TARGET_PROJECTID=${projectId}
-TEST_STUDIO_SOURCE_DATASET=staging
+TEST_STUDIO_TARGET_DATASET=staging
+TEST_STUDIO_TARGET_TOKEN=your-token-here
 `
 
 fs.writeFileSync(dotenvPath, envContents, 'utf8')

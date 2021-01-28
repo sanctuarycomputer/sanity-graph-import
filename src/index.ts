@@ -1,7 +1,14 @@
 import type { SanityClient } from '@sanity/client'
 import PromptConfirm from 'prompt-confirm'
 import invariant from 'tiny-invariant'
-import { log, flat, unique, findReferencedIds, logFetch, queue } from './utils'
+import {
+  logHeading,
+  flat,
+  unique,
+  findReferencedIds,
+  logFetch,
+  queue,
+} from './utils'
 import { deleteAll, insertDocuments } from './transactions'
 import { SanityDocument, SanityAssetDocument } from './types'
 import { DEFAULT_BATCH_SIZE } from './config'
@@ -30,6 +37,16 @@ interface DestinationConfig {
    * set this to a lower number.
    */
   batchSize?: number
+
+  /**
+   * Set this value to true or false to skip the prompt to delete
+   * all documents in the target dataset.
+   *
+   * default: undefined
+   *
+   * Leave undefined to include the prompt.
+   */
+  deleteData?: boolean | void
 }
 
 interface ImportConfig {
@@ -81,7 +98,7 @@ export const migrate = async ({
    * Fetch initial documents
    */
 
-  log(
+  logHeading(
     `Migrating from ${sourceClient.config().projectId}/${
       sourceClient.config().dataset
     } to ${destinationClient.config().projectId}/${
@@ -118,19 +135,24 @@ export const migrate = async ({
   )
   logFetch(`      + ${sourceAssets.length} source assets`)
 
-  const confirmDelete = new PromptConfirm(
-    'Do you want to remove all data from the destination dataset?'
-  )
-  const confirmed = await confirmDelete.run()
-  if (confirmed) {
+  const { deleteData } = destination
+
+  if (deleteData === undefined) {
+    const confirmDelete = new PromptConfirm(
+      'Do you want to remove all data from the destination dataset?'
+    )
+    const confirmed = await confirmDelete.run()
+    if (confirmed) {
+      await deleteAll(destinationClient)
+    }
+  } else if (deleteData === true) {
     await deleteAll(destinationClient)
   }
-
   const batchSize = destination.batchSize ?? DEFAULT_BATCH_SIZE
 
   await insertDocuments(destinationClient, sourceDocuments, sourceAssets, {
     batchSize,
   })
 
-  log('Success! 🎉')
+  logHeading('Success! 🎉')
 }

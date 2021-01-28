@@ -1,5 +1,6 @@
 import { SanityAssetDocument } from '@sanity/client'
 import { MigratedAsset, SanityDocument } from '../../types'
+import { getImageHash } from '../parsing'
 
 export const sourceImage1: SanityAssetDocument = {
   _createdAt: '2020-03-19T16:12:52Z',
@@ -18,6 +19,9 @@ export const sourceImage1: SanityAssetDocument = {
   uploadId: '4gjptnOTKAcKOS3N08hxV6a2OR8Ltgcw',
   url:
     'https://cdn.sanity.io/images/z2aip6ei/production/16e00765731c34d54d301d7f11d435fc6d2ffd8e-467x100.svg',
+  metadata: {
+    lqip: 'a123456789',
+  },
 }
 
 export const migratedImage1: SanityAssetDocument = {
@@ -27,7 +31,7 @@ export const migratedImage1: SanityAssetDocument = {
   _updatedAt: 'yesterday',
   uploadId: '9JKHaboqln0ypHm1KTr7qSz9QdyOizjg',
   _id: 'new-image-1',
-  label: 'image-1',
+  label: getImageHash(sourceImage1),
   assetId: '0a22f19843395c27c549d2f345035b3e7120e037',
   sha1hash: '0a22f19843395c27c549d2f345035b3e7120e037',
   path: 'images/nys454mt/staging/food-logo.svg',
@@ -36,6 +40,9 @@ export const migratedImage1: SanityAssetDocument = {
   extension: 'svg',
   size: 4378,
   mimeType: 'image/svg+xml',
+  metadata: {
+    lqip: 'a123456789',
+  },
 }
 
 export const sourceImage2: SanityAssetDocument = {
@@ -55,6 +62,9 @@ export const sourceImage2: SanityAssetDocument = {
   uploadId: '4gjptnOTKAcKOS3N08hxV6a2OR8Ltgcw',
   url:
     'https://cdn.sanity.io/images/z2aip6ei/production/16e00765731c34d54d301d7f11d435fc6d2ffd8e-467x100.svg',
+  metadata: {
+    lqip: 'b123456789',
+  },
 }
 
 export const migratedImage2: SanityAssetDocument = {
@@ -64,7 +74,7 @@ export const migratedImage2: SanityAssetDocument = {
   _updatedAt: 'yesterday',
   uploadId: '9JKHaboqln0ypHm1KTr7qSz9QdyOizjg',
   _id: 'new-image-2',
-  label: 'image-2',
+  label: getImageHash(sourceImage2),
   assetId: 'f3e2f19843395c27c549d2f345035b3e7120e037',
   sha1hash: 'f3e2f19843395c27c549d2f345035b3e7120e037',
   path:
@@ -75,6 +85,9 @@ export const migratedImage2: SanityAssetDocument = {
   extension: 'svg',
   size: 4378,
   mimeType: 'image/svg+xml',
+  metadata: {
+    lqip: 'b123456789',
+  },
 }
 
 export const mockSections: SanityDocument[] = [

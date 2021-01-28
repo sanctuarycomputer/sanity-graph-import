@@ -1,13 +1,21 @@
+/* eslint-disable no-console */
 import chalk from 'chalk'
 
-const mainColor = chalk.black.bgMagenta
+const mainColor = chalk.black.bgYellow
 const errorColor = chalk.bold.red
 const writeColor = chalk.green
 const fetchColor = chalk.green
 const deleteColor = chalk.yellow
 
-/* eslint-disable no-console */
-export const log = (str: string) => console.log(mainColor(str))
+/* a nice big block */
+export const logHeading = (str: string) => {
+  console.log('')
+  const padding = Array.from({ length: str.length + 4 }, () => ' ').join('')
+  console.log(mainColor(padding))
+  console.log(mainColor(`  ${str}  `))
+  console.log(mainColor(padding))
+  console.log('')
+}
 export const logFetch = (str: string) => console.log(fetchColor(str))
 export const logDelete = (str: string) => console.log(deleteColor(str))
 export const logWrite = (str: string) => console.log(writeColor(str))

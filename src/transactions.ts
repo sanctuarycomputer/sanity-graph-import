@@ -5,42 +5,21 @@ import {
   MultipleMutationResult,
 } from '@sanity/client'
 import cliProgress from 'cli-progress'
-import PQueue from 'p-queue'
 import getHashedBufferForUri from '@sanity/import/src/util/getHashedBufferForUri'
 import { MigratedAsset, UnMigratedAsset, SanityDocument } from './types'
 import {
   definitely,
-  logFetch,
   logWrite,
   logDelete,
   partition,
+  getImageHash,
+  getAssetType,
   isMigratedDocument,
   getUploadedFilename,
   chunk,
   createRemapReferences,
-  logError,
+  queue,
 } from './utils'
-
-export const fetchDocumentsByType = async (
-  client: SanityClient,
-  type: string,
-  count: number
-): Promise<SanityDocument[]> => {
-  logFetch(`Fetching documents by type: ${type}`)
-  const documents = await client.fetch<SanityDocument[]>(
-    `
-    *[_type == $type]
-    | order(releaseDate desc)
-    | order(_createdAt desc) [0...$count]{
-      ...
-    }
-    `,
-    { type, count }
-  )
-  logFetch(` - Fetched ${documents.length} documents`)
-
-  return documents
-}
 
 export const deleteAll = async (
   client: SanityClient
@@ -65,18 +44,6 @@ export const deleteAll = async (
   return result
 }
 
-const getAssetType = (document: SanityDocument) => {
-  const { _type } = document
-  const assetType = _type.replace(/^sanity./, '').replace(/Asset$/, '')
-  if (
-    !/^sanity\./.test(_type) ||
-    (assetType !== 'file' && assetType !== 'image')
-  ) {
-    throw new Error(`"${_type}" is not a valid sanity asset type`)
-  }
-  return assetType as 'image' | 'file'
-}
-
 export const uploadAsset = async (
   client: SanityClient,
   originalAsset: SanityAssetDocument
@@ -86,7 +53,7 @@ export const uploadAsset = async (
   const { buffer } = await getHashedBufferForUri(url)
 
   const options = {
-    label: originalAsset._id,
+    label: getImageHash(originalAsset),
     filename: getUploadedFilename(originalAsset),
     source: {
       id: originalAsset._id,
@@ -110,19 +77,19 @@ export const uploadAssets = async (
   client: SanityClient,
   sourceAssets: SanityAssetDocument[]
 ): Promise<MigratedAsset[]> => {
-  const fileNames = definitely(sourceAssets.map(getUploadedFilename))
+  const originalHashes = definitely(sourceAssets.map(getImageHash))
 
   /* Find assets that already exist */
   const existingAssets = await client.fetch<SanityAssetDocument[]>(
-    `*[originalFilename in $fileNames]`,
-    { fileNames }
+    `*[label in $originalHashes]`,
+    { originalHashes }
   )
 
   const assetPairs = sourceAssets.map<MigratedAsset | UnMigratedAsset>(
     (source) => ({
       source,
       destination: existingAssets.find(
-        (ca) => ca.originalFilename === getUploadedFilename(source)
+        (existingAsset) => existingAsset.label === getImageHash(source)
       ),
     })
   )
@@ -138,10 +105,6 @@ export const uploadAssets = async (
   }
 
   logWrite(`Found ${unmigrated.length} new assets to upload`)
-  const assetQueue = new PQueue({
-    concurrency: 1,
-    interval: 1000 / 25,
-  })
 
   const uploadProgressBar = new cliProgress.SingleBar(
     {},
@@ -149,7 +112,7 @@ export const uploadAssets = async (
   )
 
   uploadProgressBar.start(unmigrated.length, 0)
-  const newAssets = await assetQueue.addAll(
+  const newAssets = await queue(
     unmigrated.map(({ source }) => async () => {
       const uploadResult = await uploadAsset(client, source)
       uploadProgressBar.increment()
@@ -172,47 +135,61 @@ export const insertDocuments = async (
 ) => {
   const dataset = client.config().dataset
   const uploadedAssets = await uploadAssets(client, sourceAssets)
-  logWrite(
-    `Inserting ${sourceDocuments.length} documents into dataset ${dataset}`
-  )
+
   const remapRefs = createRemapReferences(sourceDocuments, uploadedAssets)
   const updatedDocuments = sourceDocuments.map((doc) => remapRefs(doc))
 
   const insertBatch = async (
-    batch: SanityDocument[],
-    batchNumber: number
+    batch: SanityDocument[]
   ): Promise<MultipleMutationResult> => {
-    try {
-      logWrite(`Batch ${batchNumber}: ${batch.length} documents`)
-      const transaction = batch.reduce<Transaction>(
-        (prevTrx, document) => prevTrx.createOrReplace(document),
-        client.transaction()
-      )
+    const transaction = batch.reduce<Transaction>(
+      (prevTrx, document) => prevTrx.createOrReplace(document),
+      client.transaction()
+    )
 
-      const result = await transaction.commit()
-      logWrite(`  Batch complete`)
-      return result
-    } catch (e) {
-      logError(e)
-      debugger
-      throw e
-    }
+    return transaction.commit()
   }
 
   const documentBatches = chunk(updatedDocuments, batchSize)
-  const insertQueue = new PQueue({ concurrency: 1, interval: 1000 / 25 })
-  const allResults = await insertQueue.addAll(
-    documentBatches.map((batch, index) => () => insertBatch(batch, index + 1))
-  )
+
   logWrite(
-    `Inserted ${updatedDocuments.length} documents in ${allResults.length} batches`
+    `Inserting ${sourceDocuments.length} documents into dataset "${dataset}"`
   )
-  logWrite('Strengthening references..')
+
+  const batchProgressBar = new cliProgress.SingleBar(
+    {},
+    cliProgress.Presets.shades_classic
+  )
+
+  batchProgressBar.start(updatedDocuments.length, 0)
+  await queue(
+    documentBatches.map((batch) => async () => {
+      const result = await insertBatch(batch)
+      batchProgressBar.increment(batch.length)
+      return result
+    })
+  )
+  batchProgressBar.stop()
+  logWrite(`Inserted ${updatedDocuments.length} documents`)
   const updatedStrong = sourceDocuments.map((doc) => remapRefs(doc, false))
-  const strongQueue = new PQueue({ concurrency: 1, interval: 1000 / 25 })
   const strongBatches = chunk(updatedStrong, batchSize)
-  const strongResults = await strongQueue.addAll(
-    strongBatches.map((batch, index) => () => insertBatch(batch, index + 1))
+
+  logWrite('Strengthening references..')
+
+  const strongProgressBar = new cliProgress.SingleBar(
+    {},
+    cliProgress.Presets.shades_classic
   )
+
+  strongProgressBar.start(updatedStrong.length, 0)
+
+  const strongResults = await queue(
+    strongBatches.map((batch) => async () => {
+      const result = await insertBatch(batch)
+      strongProgressBar.increment(batch.length)
+      return result
+    })
+  )
+  strongProgressBar.stop()
   return strongResults
 }
