@@ -15,7 +15,7 @@
 
 This script will take a selection of initial documents (provided by you as simple Sanity queries), then traverse through all documents it references, find all assets used by any of these documents, then add them to your destination dataset as a "complete" dataset with fully resolved references.
 
-Example: Your **production** dataset has 1000's of `article` documents, each of which contain references to one or more `author` documents. For your staging dataset, you only want the first 10 articles *and* their authors -- as well as any image & file assets these documents include.
+Example: Your **production** dataset has 1000's of `article` documents, each of which contain references to one or more `author` documents. For your staging dataset, you only want the first 10 articles _and_ their authors -- as well as any image & file assets these documents include.
 
 Looking to copy an entire dataset? Use [Sanity's CLI instead](https://www.sanity.io/docs/importing-data) instead.
 
@@ -43,7 +43,7 @@ const sourceClient = CreateClient({
 const destinationClient = CreateClient({
   projectId: 'abc123xyz',
   dataset: 'staging',
-  token: '789abc123xyz' // Required!
+  token: '789abc123xyz', // Required!
 })
 
 const initialQueries = [
@@ -55,26 +55,24 @@ const initialQueries = [
       | order(_createdAt desc) [0...$count]
     `,
     params: {
-      count: 10
-    }
+      count: 10,
+    },
   },
   /* Fetch the homepage document */
   {
-    query: `*[_type == 'homepage']`
-  }
+    query: `*[_type == 'homepage']`,
+  },
 ]
-
-
 
 async function run() {
   const config = {
     source: {
       client: sourceClient,
-      initialQueries
+      initialQueries,
     },
     desitination: {
-      client: destinationClient
-    }
+      client: destinationClient,
+    },
   }
 
   await migrate(config)
@@ -133,6 +131,15 @@ interface DestinationConfig {
    * set this to a lower number.
    */
   batchSize?: number
+  /**
+   * Set this value to true or false to skip the prompt to delete
+   * all documents in the target dataset.
+   *
+   * default: undefined
+   *
+   * Leave undefined to include the prompt.
+   */
+  deleteData?: boolean | void
 }
 ```
 
