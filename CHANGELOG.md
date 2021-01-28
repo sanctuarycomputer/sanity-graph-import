@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/sanctuarycomputer/sanity-graph-import/compare/v1.0.1...v1.1.0) (2021-01-28)
+
+
+### Bug Fixes
+
+* **lib:** fix weird duplicate image issue ([a52abc1](https://github.com/sanctuarycomputer/sanity-graph-import/commit/a52abc1eb48addcfdf4f13394faaaf6c2ae136ef))
+
+
+### Features
+
+* **lib:** add delete boolean option to config ([79abd46](https://github.com/sanctuarycomputer/sanity-graph-import/commit/79abd460baf8f71eed05a740c0b9787b2b3c1104))
+
 ## [1.0.1](https://github.com/sanctuarycomputer/sanity-graph-import/compare/v1.0.0...v1.0.1) (2021-01-26)
 
 
