@@ -1,14 +1,15 @@
-<div style="text-align: center">
 # Sanity Graph Import
-</div>
 
-<p align="center">
-<img alt="Latest Release" src="https://img.shields.io/github/v/release/sanctuarycomputer/sanity-graph-import?color=green">
-<img alt="Build Status" src="https://img.shields.io/github/checks-status/sanctuarycomputer/sanity-graph-import/main" />
-<img alt="Code Type" src="https://img.shields.io/github/languages/top/sanctuarycomputer/sanity-graph-import" />
-<a href="#Contributors">
-  <img alt="Contributor Count" src="https://img.shields.io/github/all-contributors/sanctuarycomputer/sanity-graph-import/main?color=green">
-</a>
+<p>
+  <a href="https://codecov.io/github/sanctuarycomputer/sanity-graph-import">
+    <img alt="Code Coverage" src="https://img.shields.io/codecov/c/github/sanctuarycomputer/sanity-graph-import"/>   
+  </a>
+  <img alt="Latest Release" src="https://img.shields.io/github/v/release/sanctuarycomputer/sanity-graph-import?color=green">
+  <img alt="Build Status" src="https://img.shields.io/github/checks-status/sanctuarycomputer/sanity-graph-import/main" />
+  <img alt="Code Type" src="https://img.shields.io/github/languages/top/sanctuarycomputer/sanity-graph-import" />
+  <a href="#Contributors">
+    <img alt="Contributor Count" src="https://img.shields.io/github/all-contributors/sanctuarycomputer/sanity-graph-import/main?color=green">
+  </a>
 </p>
 
 `sanity-graph-import` is a tool for making partial migrations from one [Sanity](https://www.sanity.io) dataset or project to another. This can be useful if you only want to import particular documents and those they reference. A common use case might be "refreshing" a staging dataset from production - when the production dataset is large and would otherwise take a lot of time and bandwidth to export & import.
