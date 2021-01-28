@@ -1,6 +1,8 @@
 import CreateClient from '@sanity/client'
 import dotenv from 'dotenv'
 import { migrate } from '../../src'
+
+jest.mock('../utils/logging')
 dotenv.config()
 
 global.console.warn = jest.fn()
@@ -30,7 +32,6 @@ const initialQueries = [
 
 describe('Full migration', () => {
   it('should print the same output given the same HTTP requests', async () => {
-    global.console.log = jest.fn()
     const config = {
       source: {
         client: sourceClient,

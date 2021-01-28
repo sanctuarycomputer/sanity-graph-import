@@ -3,4 +3,5 @@ module.exports = {
   testTimeout: process.env.POLLY_MODE === 'record' ? 3 * 60 * 1000 : 5000,
   setupFilesAfterEnv: ['@scaleleap/jest-polly'],
   coveragePathIgnorePatterns: ['!*.d.ts'],
+  rootDir: './src',
 }

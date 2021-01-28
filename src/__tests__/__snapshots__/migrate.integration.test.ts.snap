@@ -2,120 +2,72 @@
 
 exports[`Full migration should print the same output given the same HTTP requests 1`] = `
 Array [
-  "",
+  "Migrating from 98nzfixt/production to 98nzfixt/staging ",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 2`] = `
 Array [
-  "[30m[43m                                                           [49m[39m",
+  "Found 5 initial documents",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 3`] = `
 Array [
-  "[30m[43m  Migrating from 98nzfixt/production to 98nzfixt/staging   [49m[39m",
+  "      + 78 referenced documents",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 4`] = `
 Array [
-  "[30m[43m                                                           [49m[39m",
+  "Fetched all referenced documents",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 5`] = `
 Array [
-  "",
+  "      + 63 source assets",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 6`] = `
 Array [
-  "[32mFound 5 initial documents[39m",
+  "Clearing 98nzfixt/staging dataset...",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 7`] = `
 Array [
-  "[32m      + 78 referenced documents[39m",
+  "Removed 137 documents from 98nzfixt/staging",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 8`] = `
 Array [
-  "[32mFetched all referenced documents[39m",
+  "Found 63 new assets to upload",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 9`] = `
 Array [
-  "[32m      + 63 source assets[39m",
+  "Inserting 74 documents into dataset \\"staging\\"",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 10`] = `
 Array [
-  "[33mClearing 98nzfixt/staging dataset...[39m",
+  "Inserted 74 documents",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 11`] = `
 Array [
-  "[33mRemoved 137 documents from 98nzfixt/staging[39m",
+  "Strengthening references..",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 12`] = `
 Array [
-  "[32mFound 63 new assets to upload[39m",
-]
-`;
-
-exports[`Full migration should print the same output given the same HTTP requests 13`] = `
-Array [
-  "[32mInserting 74 documents into dataset \\"staging\\"[39m",
-]
-`;
-
-exports[`Full migration should print the same output given the same HTTP requests 14`] = `
-Array [
-  "[32mInserted 74 documents[39m",
-]
-`;
-
-exports[`Full migration should print the same output given the same HTTP requests 15`] = `
-Array [
-  "[32mStrengthening references..[39m",
-]
-`;
-
-exports[`Full migration should print the same output given the same HTTP requests 16`] = `
-Array [
-  "",
-]
-`;
-
-exports[`Full migration should print the same output given the same HTTP requests 17`] = `
-Array [
-  "[30m[43m               [49m[39m",
-]
-`;
-
-exports[`Full migration should print the same output given the same HTTP requests 18`] = `
-Array [
-  "[30m[43m  Success! 🎉  [49m[39m",
-]
-`;
-
-exports[`Full migration should print the same output given the same HTTP requests 19`] = `
-Array [
-  "[30m[43m               [49m[39m",
-]
-`;
-
-exports[`Full migration should print the same output given the same HTTP requests 20`] = `
-Array [
-  "",
+  "Success! 🎉",
 ]
 `;
