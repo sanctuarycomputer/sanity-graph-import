@@ -44,6 +44,18 @@ export const getUploadedFilename = (asset: SanityAssetDocument): string => {
 export const getImageHash = (asset: SanityAssetDocument): string =>
   hash(asset.metadata.lqip)
 
+export const getAssetType = (document: SanityDocument) => {
+  const { _type } = document
+  const assetType = _type.replace(/^sanity./, '').replace(/Asset$/, '')
+  if (
+    !/^sanity\./.test(_type) ||
+    (assetType !== 'file' && assetType !== 'image')
+  ) {
+    throw new Error(`"${_type}" is not a valid sanity asset type`)
+  }
+  return assetType as 'image' | 'file'
+}
+
 /**
  * Typeguards
  */

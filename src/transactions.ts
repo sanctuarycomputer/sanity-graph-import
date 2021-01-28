@@ -9,38 +9,17 @@ import getHashedBufferForUri from '@sanity/import/src/util/getHashedBufferForUri
 import { MigratedAsset, UnMigratedAsset, SanityDocument } from './types'
 import {
   definitely,
-  logFetch,
   logWrite,
   logDelete,
   partition,
   getImageHash,
+  getAssetType,
   isMigratedDocument,
   getUploadedFilename,
   chunk,
   createRemapReferences,
   queue,
 } from './utils'
-
-export const fetchDocumentsByType = async (
-  client: SanityClient,
-  type: string,
-  count: number
-): Promise<SanityDocument[]> => {
-  logFetch(`Fetching documents by type: ${type}`)
-  const documents = await client.fetch<SanityDocument[]>(
-    `
-    *[_type == $type]
-    | order(releaseDate desc)
-    | order(_createdAt desc) [0...$count]{
-      ...
-    }
-    `,
-    { type, count }
-  )
-  logFetch(` - Fetched ${documents.length} documents`)
-
-  return documents
-}
 
 export const deleteAll = async (
   client: SanityClient
@@ -63,18 +42,6 @@ export const deleteAll = async (
   const result = await finalTrx.commit()
   logDelete(`Removed ${ids.length} documents from ${projectId}/${dataset}`)
   return result
-}
-
-const getAssetType = (document: SanityDocument) => {
-  const { _type } = document
-  const assetType = _type.replace(/^sanity./, '').replace(/Asset$/, '')
-  if (
-    !/^sanity\./.test(_type) ||
-    (assetType !== 'file' && assetType !== 'image')
-  ) {
-    throw new Error(`"${_type}" is not a valid sanity asset type`)
-  }
-  return assetType as 'image' | 'file'
 }
 
 export const uploadAsset = async (
