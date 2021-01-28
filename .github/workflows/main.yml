@@ -26,6 +26,12 @@ jobs:
 
       - name: Test
         run: yarn test --ci --coverage --maxWorkers=2
+        env:
+          TEST_STUDIO_SOURCE_PROJECTID: ${{ secrets.TEST_STUDIO_SOURCE_PROJECTID }}
+          TEST_STUDIO_SOURCE_DATASET: ${{ secrets.TEST_STUDIO_SOURCE_DATASET }}
+          TEST_STUDIO_TARGET_PROJECTID: ${{ secrets.TEST_STUDIO_TARGET_PROJECTID }}
+          TEST_STUDIO_TARGET_DATASET: ${{ secrets.TEST_STUDIO_TARGET_DATASET }}
+          TEST_STUDIO_TARGET_TOKEN: ${{ secrets.TEST_STUDIO_TARGET_TOKEN }}
 
       - name: Upload Coverage artifact
         uses: actions/upload-artifact@v2
