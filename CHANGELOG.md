@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/sanctuarycomputer/sanity-graph-import/compare/v1.1.0...v1.1.1) (2021-02-06)
+
+
+### Bug Fixes
+
+* **repo:** make package public, oops ([477bb1b](https://github.com/sanctuarycomputer/sanity-graph-import/commit/477bb1bb1a7017af9959efd2470094639ce5dc74))
+
 # [1.1.0](https://github.com/sanctuarycomputer/sanity-graph-import/compare/v1.0.1...v1.1.0) (2021-01-28)
 
 
