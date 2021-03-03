@@ -20,9 +20,9 @@ export const unique = <T>(arr: T[]): T[] =>
 /* yanked from:
  * https://stackoverflow.com/questions/8495687/split-array-into-chunks */
 export const chunk = <T>(arr: T[], size: number): T[][] =>
-  [...Array(Math.ceil(arr.length / size))].map((_, i) =>
-    arr.slice(size * i, size + size * i)
-  )
+  [...Array(Math.ceil(arr.length / size))]
+    .fill(undefined)
+    .map((_, i) => arr.slice(size * i, size + size * i))
 
 /* yanked and adapted from:
  * https://stackoverflow.com/questions/11731072/dividing-an-array-by-filter-function */
