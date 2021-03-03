@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/sanctuarycomputer/sanity-graph-import/compare/v1.1.1...v1.1.2) (2021-03-03)
+
+
+### Bug Fixes
+
+* **lib:** fix empty array mapping in utils/misc/chunk ([f669fef](https://github.com/sanctuarycomputer/sanity-graph-import/commit/f669fef27899bb2380616a3135c59ba3f867f36d))
+
 ## [1.1.1](https://github.com/sanctuarycomputer/sanity-graph-import/compare/v1.1.0...v1.1.1) (2021-02-06)
 
 
