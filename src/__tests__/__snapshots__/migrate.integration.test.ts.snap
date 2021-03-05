@@ -8,65 +8,83 @@ Array [
 
 exports[`Full migration should print the same output given the same HTTP requests 2`] = `
 Array [
-  "Found 5 initial documents",
+  "Fetching 1 initial queries..",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 3`] = `
 Array [
-  "      + 78 referenced documents",
+  "Found 5 initial documents",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 4`] = `
 Array [
-  "Fetched all referenced documents",
+  "    movie: 5",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 5`] = `
 Array [
-  "      + 63 source assets",
+  "    + 78 referenced documents",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 6`] = `
 Array [
-  "Clearing 98nzfixt/staging dataset...",
+  "Fetching referenced documents in 16 batches..",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 7`] = `
 Array [
-  "Removed 137 documents from 98nzfixt/staging",
+  "Fetched all referenced documents",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 8`] = `
 Array [
-  "Found 63 new assets to upload",
+  "      + 63 source assets",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 9`] = `
 Array [
-  "Inserting 74 documents into dataset \\"staging\\"",
+  "Clearing 98nzfixt/staging dataset...",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 10`] = `
 Array [
-  "Inserted 74 documents",
+  "Removed 51 documents from 98nzfixt/staging",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 11`] = `
 Array [
-  "Strengthening references..",
+  "Found 63 new assets to upload",
 ]
 `;
 
 exports[`Full migration should print the same output given the same HTTP requests 12`] = `
+Array [
+  "Inserting 74 documents into dataset \\"staging\\"",
+]
+`;
+
+exports[`Full migration should print the same output given the same HTTP requests 13`] = `
+Array [
+  "Inserted 74 documents in 3 batches",
+]
+`;
+
+exports[`Full migration should print the same output given the same HTTP requests 14`] = `
+Array [
+  "Strengthening references..",
+]
+`;
+
+exports[`Full migration should print the same output given the same HTTP requests 15`] = `
 Array [
   "Success! 🎉",
 ]
