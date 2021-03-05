@@ -4,7 +4,6 @@ import {
   Transaction,
   MultipleMutationResult,
 } from '@sanity/client'
-import cliProgress from 'cli-progress'
 import getHashedBufferForUri from '@sanity/import/src/util/getHashedBufferForUri'
 import { MigratedAsset, UnMigratedAsset, SanityDocument } from './types'
 import {
@@ -106,20 +105,16 @@ export const uploadAssets = async (
 
   logWrite(`Found ${unmigrated.length} new assets to upload`)
 
-  const uploadProgressBar = new cliProgress.SingleBar(
-    {},
-    cliProgress.Presets.shades_classic
+  const [newAssets, errors] = await queue(
+    unmigrated.map(({ source }) => () => uploadAsset(client, source))
   )
 
-  uploadProgressBar.start(unmigrated.length, 0)
-  const newAssets = await queue(
-    unmigrated.map(({ source }) => async () => {
-      const uploadResult = await uploadAsset(client, source)
-      uploadProgressBar.increment()
-      return uploadResult
+  if (errors.length) {
+    errors.forEach((error) => {
+      console.log(error)
     })
-  )
-  uploadProgressBar.stop()
+  }
+
   return [...migrated, ...newAssets]
 }
 
@@ -156,40 +151,33 @@ export const insertDocuments = async (
     `Inserting ${sourceDocuments.length} documents into dataset "${dataset}"`
   )
 
-  const batchProgressBar = new cliProgress.SingleBar(
-    {},
-    cliProgress.Presets.shades_classic
+  const [results, errors] = await queue(
+    documentBatches.map((batch) => () => insertBatch(batch))
   )
 
-  batchProgressBar.start(updatedDocuments.length, 0)
-  await queue(
-    documentBatches.map((batch) => async () => {
-      const result = await insertBatch(batch)
-      batchProgressBar.increment(batch.length)
-      return result
+  if (errors.length) {
+    errors.forEach((error) => {
+      console.log(error)
     })
+  }
+
+  logWrite(
+    `Inserted ${updatedDocuments.length} documents in ${results.length} batches`
   )
-  batchProgressBar.stop()
-  logWrite(`Inserted ${updatedDocuments.length} documents`)
   const updatedStrong = sourceDocuments.map((doc) => remapRefs(doc, false))
   const strongBatches = chunk(updatedStrong, batchSize)
 
   logWrite('Strengthening references..')
 
-  const strongProgressBar = new cliProgress.SingleBar(
-    {},
-    cliProgress.Presets.shades_classic
+  const [strongResults, strongResultErrors] = await queue(
+    strongBatches.map((batch) => () => insertBatch(batch))
   )
 
-  strongProgressBar.start(updatedStrong.length, 0)
-
-  const strongResults = await queue(
-    strongBatches.map((batch) => async () => {
-      const result = await insertBatch(batch)
-      strongProgressBar.increment(batch.length)
-      return result
+  if (strongResultErrors.length) {
+    strongResultErrors.forEach((error) => {
+      console.log(error)
     })
-  )
-  strongProgressBar.stop()
+  }
+
   return strongResults
 }

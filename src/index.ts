@@ -3,11 +3,13 @@ import PromptConfirm from 'prompt-confirm'
 import invariant from 'tiny-invariant'
 import {
   logHeading,
-  flat,
   unique,
   findReferencedIds,
   logFetch,
   queue,
+  flat,
+  chunk,
+  definitely,
 } from './utils'
 import { deleteAll, insertDocuments } from './transactions'
 import { SanityDocument, SanityAssetDocument } from './types'
@@ -52,6 +54,10 @@ interface DestinationConfig {
 interface ImportConfig {
   source: SourceConfig
   destination: DestinationConfig
+}
+
+interface DocumentCounts {
+  [key: string]: number
 }
 
 const getConfigString = (client: SanityClient): string => {
@@ -105,25 +111,71 @@ export const migrate = async ({
       destinationClient.config().dataset
     } `
   )
-  const initialDocuments = flat(
-    await queue<SanityDocument[]>(
-      source.initialQueries.map(({ query, params }) => () =>
-        sourceClient.fetch(query, params || {})
-      )
+
+  logFetch(`Fetching ${source.initialQueries.length} initial queries..`)
+
+  const [initialDocumentBatches, initialDocErrors] = await queue<
+    SanityDocument[]
+  >(
+    source.initialQueries.map(({ query, params }) => () =>
+      sourceClient.fetch(query, params || {})
     )
   )
+
+  const initialDocuments = flat(initialDocumentBatches)
+
+  if (initialDocErrors) {
+    initialDocErrors.forEach((error) => {
+      console.log(error)
+    })
+  }
 
   const docIds = initialDocuments.map(({ _id }) => _id)
   const referencedIds = flat(initialDocuments.map(findReferencedIds))
   const allIds = unique(docIds.concat(referencedIds))
 
-  logFetch(`Found ${initialDocuments.length} initial documents`)
-  logFetch(`      + ${referencedIds.length} referenced documents`)
-
-  const sourceDocuments = await sourceClient.fetch<SanityDocument[]>(
-    `*[_id in $allIds && _type != 'sanity.imageAsset' && _type != 'sanity.fileAsset']`,
-    { allIds }
+  const documentCounts = initialDocuments.reduce<DocumentCounts>(
+    (documentCounts, document) => {
+      const type = document._type
+      const currentCount = documentCounts[type] || 0
+      return {
+        ...documentCounts,
+        [type]: currentCount + 1,
+      }
+    },
+    {}
   )
+
+  logFetch(`Found ${initialDocuments.length} initial documents`)
+  Object.entries(documentCounts).forEach(([type, count]) => {
+    logFetch(`    ${type}: ${count}`)
+  })
+
+  logFetch(`    + ${referencedIds.length} referenced documents`)
+
+  const allIdBatches = chunk(allIds, 5)
+  logFetch(`Fetching referenced documents in ${allIdBatches.length} batches..`)
+  const [batchedSourceDocuments, errors] = await queue(
+    allIdBatches.map((allIds) => () =>
+      sourceClient
+        .fetch<SanityDocument[]>(
+          `*[_id in $allIds && _type != 'sanity.imageAsset' && _type != 'sanity.fileAsset']`,
+          { allIds }
+        )
+        .catch((err) => {
+          console.log(err)
+        })
+    )
+  )
+
+  if (errors) {
+    errors.forEach((error) => {
+      console.log(error)
+    })
+  }
+
+  const sourceDocuments = flat(definitely(batchedSourceDocuments))
+
   logFetch(`Fetched all referenced documents`)
 
   const assetIds = flat(sourceDocuments.map(findReferencedIds)).filter(
