@@ -144,6 +144,19 @@ interface DestinationConfig {
 }
 ```
 
+## Debugging
+
+To output additional information in the console, run your script with a `DEBUG=SGI:scope` variable with a following scope:
+
+- `SGI:patch`: Log all document patches
+- `SGI:results`: Log all results from successful operations
+- `SGI:errors`: Log all errors
+- `SGI:*`: Output all debugging information
+
+example: `DEBUG=SGI:results node myMigrationScript.js`
+
+By default, the process will catch errors, continue with operations, and log all errors when the entire process is complete. If you want to exit the process any time an error occurs, run your command with `FAIL_FAST=1 node myMigrationScript.js`
+
 # Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)

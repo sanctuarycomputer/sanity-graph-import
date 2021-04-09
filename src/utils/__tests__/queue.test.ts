@@ -14,14 +14,14 @@ const sleep = (ms: number): Promise<void> =>
 describe('queue', () => {
   it('should work with sync functions', async () => {
     const results = await queue(dogs.map((dog) => () => upCase(dog)))
-    expect(results[0]).toBe('Frank')
-    expect(results[1]).toBe('Muenster')
+    expect(results[0][0]).toBe('Frank')
+    expect(results[0][1]).toBe('Muenster')
   })
 
   it('should work with async functions', async () => {
     const results = await queue(dogs.map((dog) => () => upCaseAsync(dog)))
-    expect(results[0]).toBe('Frank')
-    expect(results[1]).toBe('Muenster')
+    expect(results[0][0]).toBe('Frank')
+    expect(results[0][1]).toBe('Muenster')
   })
 
   it('should apply custom addAll options', async () => {
@@ -33,6 +33,6 @@ describe('queue', () => {
       // The promises will time out and return undefined
       { timeout: 1 }
     )
-    expect(result).toEqual([undefined, undefined, undefined, undefined])
+    expect(result[0]).toEqual([undefined, undefined, undefined, undefined])
   })
 })

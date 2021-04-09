@@ -4,13 +4,15 @@ import {
   Transaction,
   MultipleMutationResult,
 } from '@sanity/client'
-import cliProgress from 'cli-progress'
 import getHashedBufferForUri from '@sanity/import/src/util/getHashedBufferForUri'
 import { MigratedAsset, UnMigratedAsset, SanityDocument } from './types'
 import {
+  CaughtError,
+  retryCaughtErrors,
   definitely,
   logWrite,
   logDelete,
+  logError,
   partition,
   getImageHash,
   getAssetType,
@@ -106,20 +108,16 @@ export const uploadAssets = async (
 
   logWrite(`Found ${unmigrated.length} new assets to upload`)
 
-  const uploadProgressBar = new cliProgress.SingleBar(
-    {},
-    cliProgress.Presets.shades_classic
+  const [newAssets, errors] = await queue(
+    unmigrated.map(({ source }) => () => uploadAsset(client, source))
   )
 
-  uploadProgressBar.start(unmigrated.length, 0)
-  const newAssets = await queue(
-    unmigrated.map(({ source }) => async () => {
-      const uploadResult = await uploadAsset(client, source)
-      uploadProgressBar.increment()
-      return uploadResult
+  if (errors.length) {
+    errors.forEach((error) => {
+      console.log(error)
     })
-  )
-  uploadProgressBar.stop()
+  }
+
   return [...migrated, ...newAssets]
 }
 
@@ -127,12 +125,14 @@ interface InsertDocumentOptions {
   batchSize: number
 }
 
+type InsertDocumentsResponse = [MultipleMutationResult[], CaughtError[]]
+
 export const insertDocuments = async (
   client: SanityClient,
   sourceDocuments: SanityDocument[],
   sourceAssets: SanityAssetDocument[],
   { batchSize }: InsertDocumentOptions
-) => {
+): Promise<InsertDocumentsResponse> => {
   const dataset = client.config().dataset
   const uploadedAssets = await uploadAssets(client, sourceAssets)
 
@@ -142,12 +142,16 @@ export const insertDocuments = async (
   const insertBatch = async (
     batch: SanityDocument[]
   ): Promise<MultipleMutationResult> => {
+    const initialTransaction = client.transaction()
     const transaction = batch.reduce<Transaction>(
       (prevTrx, document) => prevTrx.createOrReplace(document),
-      client.transaction()
+      initialTransaction
     )
 
-    return transaction.commit()
+    const result = await transaction.commit().catch((err) => {
+      throw err
+    })
+    return result
   }
 
   const documentBatches = chunk(updatedDocuments, batchSize)
@@ -156,40 +160,48 @@ export const insertDocuments = async (
     `Inserting ${sourceDocuments.length} documents into dataset "${dataset}"`
   )
 
-  const batchProgressBar = new cliProgress.SingleBar(
-    {},
-    cliProgress.Presets.shades_classic
+  const [insertResults, insertErrors] = await queue(
+    documentBatches.map((batch) => () => insertBatch(batch))
   )
 
-  batchProgressBar.start(updatedDocuments.length, 0)
-  await queue(
-    documentBatches.map((batch) => async () => {
-      const result = await insertBatch(batch)
-      batchProgressBar.increment(batch.length)
-      return result
-    })
+  if (insertErrors.length) {
+    logError(
+      `There were ${insertResults.length} errors inserting your documents. Retrying..`
+    )
+  }
+  const [
+    retryInsertResults,
+    retryInsertErrors,
+  ] = await retryCaughtErrors<MultipleMutationResult>(insertErrors)
+
+  const successfulInserts = [...insertResults, ...retryInsertResults]
+
+  logWrite(
+    `Inserted ${updatedDocuments.length} documents in ${successfulInserts.length} batches`
   )
-  batchProgressBar.stop()
-  logWrite(`Inserted ${updatedDocuments.length} documents`)
   const updatedStrong = sourceDocuments.map((doc) => remapRefs(doc, false))
   const strongBatches = chunk(updatedStrong, batchSize)
 
   logWrite('Strengthening references..')
 
-  const strongProgressBar = new cliProgress.SingleBar(
-    {},
-    cliProgress.Presets.shades_classic
+  const [strongResults, strongResultErrors] = await queue(
+    strongBatches.map((batch) => () => insertBatch(batch))
   )
 
-  strongProgressBar.start(updatedStrong.length, 0)
+  if (strongResultErrors.length) {
+    logError(
+      `There were ${strongResultErrors.length} errors inserting your documents. Retrying..`
+    )
+  }
+  const [
+    retryStrongResults,
+    retryStrongErrors,
+  ] = await retryCaughtErrors<MultipleMutationResult>(strongResultErrors)
 
-  const strongResults = await queue(
-    strongBatches.map((batch) => async () => {
-      const result = await insertBatch(batch)
-      strongProgressBar.increment(batch.length)
-      return result
-    })
-  )
-  strongProgressBar.stop()
-  return strongResults
+  const successfulStrongs = [...strongResults, ...retryStrongResults]
+
+  const successes = [...successfulInserts, ...successfulStrongs]
+  const errors = [...retryInsertErrors, ...retryStrongErrors]
+
+  return [successes, errors]
 }

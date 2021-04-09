@@ -13,20 +13,57 @@ import {
 import { flat, unique, definitely } from './misc'
 
 /**
+ * Type Guards
+ */
+
+export const isReference: IsReferenceFn = (obj: any): obj is SanityReference =>
+  Boolean(obj) && typeof obj._ref === 'string' && obj._ref.length > 0
+
+const assetIdRegexp = /^(image-|file-)/
+
+const isDocumentReference: IsReferenceFn = (obj: any): obj is SanityReference =>
+  isReference(obj) && !assetIdRegexp.test(obj._ref)
+
+const isAssetReference: IsReferenceFn = (obj: any): obj is SanityReference =>
+  isReference(obj) && assetIdRegexp.test(obj._ref)
+
+export const isAsset = (doc: SanityDocument): doc is SanityAssetDocument =>
+  Boolean(doc) &&
+  (doc._type === 'sanity.imageAsset' || doc._type === 'sanity.fileAsset')
+
+export const isSanityAssetObject = (obj: any): obj is SanityAssetObject =>
+  Boolean(obj) &&
+  (obj._type === 'image' || obj._type === 'file') &&
+  obj.asset !== undefined &&
+  isAssetReference(obj.asset)
+
+export const isSanityObject = (obj: any): obj is SanityObject => {
+  return isPlainObject(obj)
+}
+
+export function isMigratedDocument<DocType extends SanityDocument>(
+  pair: any
+): pair is MigratedDocument<DocType> {
+  return Boolean(pair) && Boolean(pair.source) && Boolean(pair.destination)
+}
+
+/**
  * Getters
  */
 
-export const findReferencedIds = (
+type IsReferenceFn = (obj: any) => obj is SanityReference
+
+export const findReferencedIds = (isReferenceFn: IsReferenceFn) => (
   doc: SanityDocument | SanityObject
 ): string[] => {
   const getIds = (value: SanityFieldValue): string[] => {
     if (!value) return []
-    if (isReference(value)) return [value._ref]
+    if (isReferenceFn(value)) return [value._ref]
     if (Array.isArray(value)) {
       return flat(definitely(value.map(getIds)))
     }
     if (isSanityObject(value)) {
-      return findReferencedIds(value)
+      return findReferencedIds(isReferenceFn)(value)
     }
     return []
   }
@@ -37,9 +74,11 @@ export const findReferencedIds = (
   return unique(result)
 }
 
-export const getUploadedFilename = (asset: SanityAssetDocument): string => {
-  return asset.path.replace(/(.*\/)*/, '')
-}
+export const findReferencedDocumentIds = findReferencedIds(isDocumentReference)
+export const findReferencedAssetIds = findReferencedIds(isAssetReference)
+
+export const getUploadedFilename = (asset: SanityAssetDocument): string =>
+  asset.path.replace(/(.*\/)*/, '')
 
 export const getImageHash = (asset: SanityAssetDocument): string =>
   hash(asset.metadata.lqip)
@@ -59,32 +98,6 @@ export const getAssetType = (document: SanityDocument) => {
 /**
  * Typeguards
  */
-
-export const isAsset = (doc: SanityDocument): doc is SanityAssetDocument =>
-  Boolean(doc) &&
-  (doc._type === 'sanity.imageAsset' || doc._type === 'sanity.fileAsset')
-
-export const isSanityAssetObject = (obj: any): obj is SanityAssetObject =>
-  Boolean(obj) &&
-  (obj._type === 'image' || obj._type === 'file') &&
-  obj.asset !== undefined &&
-  isReference(obj.asset)
-
-export const isSanityObject = (obj: any): obj is SanityObject => {
-  return isPlainObject(obj)
-}
-
-export const isReference = (obj: any): obj is SanityReference =>
-  Boolean(obj) &&
-  obj._type === 'reference' &&
-  typeof obj._ref === 'string' &&
-  obj._ref.length > 0
-
-export function isMigratedDocument<DocType extends SanityDocument>(
-  pair: any
-): pair is MigratedDocument<DocType> {
-  return Boolean(pair) && Boolean(pair.source) && Boolean(pair.destination)
-}
 
 /**
  * Transformers

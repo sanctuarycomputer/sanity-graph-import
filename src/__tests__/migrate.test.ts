@@ -18,6 +18,8 @@ const destClientOpts = {
 
 const initialQueries = [{ query: '*[_type == "someType"]' }]
 
+global.console.log = jest.fn()
+
 describe('migrate/setup', () => {
   it('should throw if both clients are the same', async () => {
     const config = {

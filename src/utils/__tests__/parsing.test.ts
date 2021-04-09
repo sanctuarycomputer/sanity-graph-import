@@ -3,7 +3,8 @@ import {
   createRemapReferences,
   createRemapDocumentReferences,
   createRemapAssetReferences,
-  findReferencedIds,
+  findReferencedDocumentIds,
+  findReferencedAssetIds,
   getUploadedFilename,
   getAssetType,
   isAsset,
@@ -23,17 +24,21 @@ import {
   mockArticles,
 } from './stubs'
 
-describe('findReferencedIds', () => {
+describe('findReferencedDocumentIds', () => {
   it('should extract a list of referenced IDs from a sanity document', () => {
-    expect(findReferencedIds(mockDoc)).toEqual([
+    expect(findReferencedDocumentIds(mockDoc)).toEqual([
       'section-1',
       'article-1',
       'article-2',
-      'image-2',
       'author-1',
       'author-2',
-      'image-1',
     ])
+  })
+})
+
+describe('findReferencedAssettIds', () => {
+  it('should extract a list of referenced IDs from a sanity document', () => {
+    expect(findReferencedAssetIds(mockDoc)).toEqual(['image-2', 'image-1'])
   })
 })
 
