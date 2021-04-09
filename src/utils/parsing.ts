@@ -16,11 +16,8 @@ import { flat, unique, definitely } from './misc'
  * Type Guards
  */
 
-const isReference: IsReferenceFn = (obj: any): obj is SanityReference =>
-  Boolean(obj) &&
-  // obj._type === 'reference' &&
-  typeof obj._ref === 'string' &&
-  obj._ref.length > 0
+export const isReference: IsReferenceFn = (obj: any): obj is SanityReference =>
+  Boolean(obj) && typeof obj._ref === 'string' && obj._ref.length > 0
 
 const assetIdRegexp = /^(image-|file-)/
 
@@ -56,7 +53,7 @@ export function isMigratedDocument<DocType extends SanityDocument>(
 
 type IsReferenceFn = (obj: any) => obj is SanityReference
 
-const findReferencedIds = (isReferenceFn: IsReferenceFn) => (
+export const findReferencedIds = (isReferenceFn: IsReferenceFn) => (
   doc: SanityDocument | SanityObject
 ): string[] => {
   const getIds = (value: SanityFieldValue): string[] => {

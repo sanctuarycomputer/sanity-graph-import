@@ -21,7 +21,7 @@
 		"test:coverage": "tsdx test --collectCoverage",
 		"test:coverage:send": "codecov",
 		"test:watch": "tsdx test --watch",
-		"test:record": "POLLY_MODE=record yarn test",
+		"test:record": "POLLY_MODE=record yarn test -u",
 		"lint": "tsdx lint src",
 		"prepare": "tsdx build",
 		"size": "size-limit",

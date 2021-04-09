@@ -84,8 +84,10 @@ export const migrate = async ({
     const sourceConfigString = getConfigString(sourceClient)
     const destConfigString = getConfigString(destinationClient)
 
+    console.log({ sourceConfigString, destConfigString })
+    console.log(sourceConfigString === destConfigString)
     invariant(
-      !(sourceConfigString === destConfigString),
+      Boolean(sourceConfigString !== destConfigString),
       `Both clients have the same configuration: ${sourceConfigString}`
     )
 
@@ -228,6 +230,6 @@ export const migrate = async ({
     }
   } catch (err) {
     logError(err)
-    process.exit()
+    throw err
   }
 }

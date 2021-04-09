@@ -51,9 +51,10 @@ export const queue = async <ReturnType>(
           debugResult(result)
           return result
         } catch (error) {
+          console.log(process.env.FAIL_FAST)
           if (process.env.FAIL_FAST) {
             console.error(error)
-            process.exit()
+            process.exit(1)
           }
           if (isCaughtError(error)) {
             debugError(error.error)
