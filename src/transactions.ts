@@ -7,9 +7,12 @@ import {
 import getHashedBufferForUri from '@sanity/import/src/util/getHashedBufferForUri'
 import { MigratedAsset, UnMigratedAsset, SanityDocument } from './types'
 import {
+  CaughtError,
+  retryCaughtErrors,
   definitely,
   logWrite,
   logDelete,
+  logError,
   partition,
   getImageHash,
   getAssetType,
@@ -122,12 +125,14 @@ interface InsertDocumentOptions {
   batchSize: number
 }
 
+type InsertDocumentsResponse = [MultipleMutationResult[], CaughtError[]]
+
 export const insertDocuments = async (
   client: SanityClient,
   sourceDocuments: SanityDocument[],
   sourceAssets: SanityAssetDocument[],
   { batchSize }: InsertDocumentOptions
-) => {
+): Promise<InsertDocumentsResponse> => {
   const dataset = client.config().dataset
   const uploadedAssets = await uploadAssets(client, sourceAssets)
 
@@ -137,12 +142,16 @@ export const insertDocuments = async (
   const insertBatch = async (
     batch: SanityDocument[]
   ): Promise<MultipleMutationResult> => {
+    const initialTransaction = client.transaction()
     const transaction = batch.reduce<Transaction>(
       (prevTrx, document) => prevTrx.createOrReplace(document),
-      client.transaction()
+      initialTransaction
     )
 
-    return transaction.commit()
+    const result = await transaction.commit().catch((err) => {
+      throw err
+    })
+    return result
   }
 
   const documentBatches = chunk(updatedDocuments, batchSize)
@@ -151,18 +160,24 @@ export const insertDocuments = async (
     `Inserting ${sourceDocuments.length} documents into dataset "${dataset}"`
   )
 
-  const [results, errors] = await queue(
+  const [insertResults, insertErrors] = await queue(
     documentBatches.map((batch) => () => insertBatch(batch))
   )
 
-  if (errors.length) {
-    errors.forEach((error) => {
-      console.log(error)
-    })
+  if (insertErrors.length) {
+    logError(
+      `There were ${insertResults.length} errors inserting your documents. Retrying..`
+    )
   }
+  const [
+    retryInsertResults,
+    retryInsertErrors,
+  ] = await retryCaughtErrors<MultipleMutationResult>(insertErrors)
+
+  const successfulInserts = [...insertResults, ...retryInsertResults]
 
   logWrite(
-    `Inserted ${updatedDocuments.length} documents in ${results.length} batches`
+    `Inserted ${updatedDocuments.length} documents in ${successfulInserts.length} batches`
   )
   const updatedStrong = sourceDocuments.map((doc) => remapRefs(doc, false))
   const strongBatches = chunk(updatedStrong, batchSize)
@@ -174,10 +189,19 @@ export const insertDocuments = async (
   )
 
   if (strongResultErrors.length) {
-    strongResultErrors.forEach((error) => {
-      console.log(error)
-    })
+    logError(
+      `There were ${strongResultErrors.length} errors inserting your documents. Retrying..`
+    )
   }
+  const [
+    retryStrongResults,
+    retryStrongErrors,
+  ] = await retryCaughtErrors<MultipleMutationResult>(strongResultErrors)
 
-  return strongResults
+  const successfulStrongs = [...strongResults, ...retryStrongResults]
+
+  const successes = [...successfulInserts, ...successfulStrongs]
+  const errors = [...retryInsertErrors, ...retryStrongErrors]
+
+  return [successes, errors]
 }

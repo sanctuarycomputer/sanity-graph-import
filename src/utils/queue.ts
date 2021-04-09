@@ -1,6 +1,7 @@
 import PQueue from 'p-queue'
 import cliProgress from 'cli-progress'
 import { MaybeError, CaughtError, isCaughtError, catchable } from './catchable'
+import { debugError, debugResult } from './logging'
 
 type QueueOpts = ConstructorParameters<typeof PQueue>[0]
 type Task<TaskResultType> =
@@ -46,10 +47,20 @@ export const queue = async <ReturnType>(
     tasks.map((task) =>
       catchable(async () => {
         try {
-          return task()
+          const result = await task()
+          debugResult(result)
+          return result
         } catch (error) {
-          if (isCaughtError(error)) return error
-          return new CaughtError(error)
+          if (process.env.FAIL_FAST) {
+            console.error(error)
+            process.exit()
+          }
+          if (isCaughtError(error)) {
+            debugError(error.error)
+            return error
+          }
+          debugError(error)
+          return new CaughtError(error, error.message, task)
         }
       })
     )

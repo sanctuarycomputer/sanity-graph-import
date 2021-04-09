@@ -1,9 +1,8 @@
 export class CaughtError {
   constructor(
     public error: Error,
-    public fn?: () => any | Promise<any>,
-    public params?: any,
-    public errorMessage?: string | undefined
+    public errorMessage: string | undefined,
+    public retry: () => any | Promise<any>
   ) {}
 }
 
@@ -20,6 +19,9 @@ export const catchable = <Fn extends SomeFn>(fn: Fn) => (
   try {
     return fn(...params)
   } catch (error) {
-    return new Promise((resolve) => resolve(new CaughtError(error, fn, params)))
+    const retry = () => fn(params)
+    return new Promise((resolve) =>
+      resolve(new CaughtError(error, error.message, retry))
+    )
   }
 }

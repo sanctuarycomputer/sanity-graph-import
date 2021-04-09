@@ -1,5 +1,10 @@
 /* eslint-disable no-console */
 import chalk from 'chalk'
+import Debug from 'debug'
+
+export const debugPatch = Debug('SGI:patch')
+export const debugResult = Debug('SGI:results')
+export const debugError = Debug('SGI:errors')
 
 const mainColor = chalk.black.bgYellow
 const errorColor = chalk.bold.red
